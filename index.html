@@ -1,0 +1,525 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SokoMart | Black November</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f5f5f5;font-family:Arial;color:#222}
+header{background:white;position:sticky;top:0;z-index:10;box-shadow:0 2px 8px #ddd}
+.top{background:#222;color:white;padding:8px 5%;font-size:12px;display:flex;justify-content:space-between}
+.nav{padding:15px 5%;display:flex;gap:15px;align-items:center;flex-wrap:wrap}
+.logo{font-size:27px;font-weight:bold;color:#f68b1e}
+.logo span{color:#222}
+.search{display:flex;flex:1;min-width:200px}
+input,select{padding:12px;border:1px solid #ddd;border-radius:5px}
+.search input{flex:1;min-width:0}
+button{cursor:pointer}
+.search button,.btn,.add{background:#f68b1e;color:white;border:0;padding:12px;border-radius:5px;font-weight:bold}
+.nav button{border:0;background:white;font-weight:bold}
+.wrap{max-width:1250px;margin:auto;padding:15px}
+.hero{background:linear-gradient(110deg,#171717,#65360d);color:white;padding:35px;border-radius:10px;display:flex;justify-content:space-between;align-items:center}
+.hero h1{font-size:clamp(30px,5vw,48px)}
+.hero strong,.sale{color:#ffad46}
+.sale{font-size:65px;font-weight:bold}
+.section{display:flex;justify-content:space-between;align-items:center;margin:22px 0 12px}
+.promos{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.promo{background:white;padding:15px;border-left:4px solid #f68b1e;border-radius:6px;cursor:pointer}
+.promo small{display:block;color:#777;margin-top:7px}
+.categories{display:flex;gap:8px;overflow:auto;padding:10px 0}
+.chip{border:1px solid #ddd;background:white;border-radius:20px;padding:10px 14px;white-space:nowrap}
+.chip.active{background:#222;color:white}
+.grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}
+.card{background:white;border-radius:7px;overflow:hidden;position:relative}
+.photo{height:145px;background:#fafafa}
+.photo img{width:100%;height:100%;object-fit:contain}
+.info{padding:10px}
+.name{height:36px;overflow:hidden;font-size:13px}
+.price{font-size:17px;font-weight:bold;margin:8px 0}
+.old{text-decoration:line-through;color:#999;font-size:11px}
+.discount{color:red;font-size:11px}
+.tag{position:absolute;top:8px;left:8px;background:#d33;color:white;padding:5px;font-size:10px}
+.stock{font-size:11px;color:green;margin:7px 0}
+.add{width:100%}
+.pagination{text-align:center;padding:20px}
+.pagination button{padding:9px 13px;margin:3px;border:1px solid #ddd;background:white}
+.pagination .active{background:#222;color:white}
+footer{background:#222;color:white;text-align:center;padding:25px}
+.modal{display:none;position:fixed;inset:0;background:#0009;z-index:20;align-items:center;justify-content:center;padding:15px}
+.panel{background:white;padding:22px;border-radius:8px;width:min(430px,100%);max-height:90vh;overflow:auto}
+.panel input,.panel select{width:100%;margin:7px 0 12px}
+.wide{width:100%;padding:12px;background:#f68b1e;color:white;border:0;border-radius:5px}
+.close{float:right;border:0;background:none;font-size:23px}
+.cartline{display:flex;justify-content:space-between;border-bottom:1px solid #ddd;padding:10px 0;gap:10px}
+.muted{font-size:12px;color:#777}
+@media(max-width:950px){.grid{grid-template-columns:repeat(4,1fr)}}
+@media(max-width:650px){.grid{grid-template-columns:repeat(2,1fr)}.promos{grid-template-columns:repeat(2,1fr)}.hero{padding:20px}.sale{font-size:40px}}
+</style>
+</head>
+<body>
+
+<header>
+<div class="top">
+<span>Kenya's Online Demo Marketplace</span>
+<span>BLACK NOVEMBER 2026</span>
+</div>
+<div class="nav">
+<div class="logo">Soko<span>Mart</span></div>
+<div class="search">
+<input id="search" placeholder="Search 12,000 products...">
+<button onclick="render()">Search</button>
+</div>
+<button onclick="showModal('login')">Sign In</button>
+<button onclick="showModal('register')">Register</button>
+<button onclick="openCart()">🛒 Cart (<span id="cartCount">0</span>)</button>
+</div>
+</header>
+
+<main class="wrap">
+
+<section class="hero">
+<div>
+<p>THE BIGGEST SHOPPING EVENT</p>
+<h1>BLACK NOVEMBER<br><strong>MEGA OFFERS</strong></h1>
+<p>12,000 products. Incredible demo deals.</p>
+<button class="btn" onclick="showPromo('Black November Mega Deal')">SHOP NOW</button>
+</div>
+<div class="sale">SALE!</div>
+</section>
+
+<div class="section"><h2>Promotional Offers</h2></div>
+<div class="promos" id="promos"></div>
+
+<div class="section"><h2>Shop by Department</h2></div>
+<div class="categories" id="categories"></div>
+
+<div class="section">
+<h2 id="heading">All Products</h2>
+<select id="sort" onchange="render()">
+<option value="featured">Featured</option>
+<option value="low">Price: Low to High</option>
+<option value="high">Price: High to Low</option>
+<option value="discount">Biggest Discount</option>
+<option value="name">Name A-Z</option>
+</select>
+</div>
+
+<div class="grid" id="products"></div>
+<div class="pagination" id="pagination"></div>
+
+<p class="muted">Demo products and promotional prices are illustrative, not verified supplier offers.</p>
+</main>
+
+<footer>
+© 2026 SokoMart Marketplace | Demo Mode | No real payment collected
+</footer>
+
+<!-- Registration -->
+<div class="modal" id="register">
+<div class="panel">
+<button class="close" onclick="closeModal('register')">×</button>
+<h2>Create Account</h2>
+<form id="registerForm">
+<input id="regName" placeholder="Full Name" required>
+<input id="regEmail" type="email" placeholder="Email Address" required>
+<input id="regPassword" type="password" minlength="8" placeholder="Password (8+ characters)" required>
+<select id="regRole">
+<option value="customer">Customer</option>
+<option value="seller">Seller</option>
+</select>
+<button class="wide">Send Email OTP</button>
+</form>
+<div id="otpArea" style="display:none">
+<input id="otpCode" maxlength="6" placeholder="Enter 6-digit OTP">
+<button class="wide" onclick="verifyOTP()">Verify Email</button>
+<p id="otpInfo" class="muted"></p>
+</div>
+<p id="regMessage" class="muted"></p>
+</div>
+</div>
+
+<!-- Login -->
+<div class="modal" id="login">
+<div class="panel">
+<button class="close" onclick="closeModal('login')">×</button>
+<h2>Sign In</h2>
+<form id="loginForm">
+<input id="loginEmail" type="email" placeholder="Email" required>
+<input id="loginPassword" type="password" placeholder="Password" required>
+<button class="wide">Sign In</button>
+</form>
+<p id="loginMessage" class="muted"></p>
+</div>
+</div>
+
+<!-- Cart -->
+<div class="modal" id="cart">
+<div class="panel">
+<button class="close" onclick="closeModal('cart')">×</button>
+<h2>Shopping Cart</h2>
+<div id="cartItems"></div>
+<h3 id="total">Total: KSh 0</h3>
+<button class="wide" onclick="checkout()">Complete Demo Checkout</button>
+<p id="checkoutMessage" class="muted">No real payment will be collected.</p>
+</div>
+</div>
+
+<script>
+const API_BASE="http://localhost:4000/api";
+
+const departments={
+"Phones & Electronics":{
+brands:["Samsung","Apple","Tecno","Infinix","Xiaomi","Oraimo","JBL","HP"],
+items:["Smartphone","Tablet","Earbuds","Power Bank","Smart Watch","Laptop","Speaker","Charger"],
+min:500,max:150000,
+image:"photo-1511707171634-5f897ff02aa9"
+},
+"Fashion":{
+brands:["Nike","Adidas","Puma","Urban Style","Classic Wear"],
+items:["Sneakers","T-Shirt","Hoodie","Jeans","Handbag","Dress","Watch","Sandals"],
+min:300,max:20000,
+image:"photo-1523275335684-37898b6baf30"
+},
+"Home & Living":{
+brands:["HomePro","DecoLiving","Modern Home","ComfortPlus"],
+items:["Duvet Set","Table Lamp","Wall Clock","Cookware Set","Organizer","Bedsheet Set","Chair","Carpet"],
+min:400,max:30000,
+image:"photo-1556911220-e15b29be8c8f"
+},
+"Beauty":{
+brands:["Nivea","Garnier","Maybelline","L'Oreal","Dove"],
+items:["Skincare Set","Perfume","Hair Dryer","Face Cleanser","Body Lotion","Makeup Kit","Sunscreen","Shampoo"],
+min:200,max:15000,
+image:"photo-1608248543803-ba4f8c70ae0b"
+},
+"Appliances":{
+brands:["Ramtons","Von","Hisense","Mika","Nunix"],
+items:["Kettle","Air Fryer","Standing Fan","Blender","Microwave","Rice Cooker","Toaster","Vacuum Cleaner"],
+min:900,max:90000,
+image:"photo-1570222094114-d054a817e56b"
+},
+"Sports":{
+brands:["Nike","Adidas","Decathlon","FitLife"],
+items:["Football","Yoga Mat","Dumbbell Set","Running Shoes","Skipping Rope","Gym Gloves","Jersey","Tennis Racket"],
+min:250,max:65000,
+image:"photo-1517836357463-d25dfeac3438"
+},
+"Baby & Kids":{
+brands:["Pampers","Huggies","Johnson's","KidsWorld"],
+items:["Diaper Pack","Feeding Bottle","Baby Blanket","Stroller","Baby Carrier","Learning Toy","Kids Shoes","Building Blocks"],
+min:200,max:40000,
+image:"photo-1519689680058-324335c77eba"
+},
+"Automotive":{
+brands:["Bosch","ArmorAll","AutoMate","CarCare"],
+items:["Phone Holder","Cleaning Kit","Dash Camera","Tyre Inflator","Seat Covers","Car Charger","LED Lights","Tool Kit"],
+min:300,max:45000,
+image:"photo-1503376780353-7e6692767b70"
+},
+"Groceries":{
+brands:["Brookside","KCC","Ketepa","FreshChoice"],
+items:["Coffee 500g","Tea Pack","Cooking Oil 1L","Rice 2kg","Cereal","Honey 500g","Pasta","Juice Pack"],
+min:100,max:5000,
+image:"photo-1542838132-92c53300491e"
+},
+"Books & Stationery":{
+brands:["Oxford","Longhorn","Pilot","Staedtler"],
+items:["Notebook Set","Pen Pack","Textbook","Desk Organizer","Drawing Set","Printer Paper","Calculator","File Folders"],
+min:80,max:10000,
+image:"photo-1455390582262-044c alb"
+},
+"Gaming":{
+brands:["Sony","Microsoft","Logitech","Razer"],
+items:["Gaming Controller","Keyboard","Gaming Mouse","Headset","Console Stand","Gaming Chair","Mouse Pad","Gaming Monitor"],
+min:700,max:100000,
+image:"photo-1606144042614-b2417e99c4e3"
+},
+"Travel & Outdoors":{
+brands:["SafariPro","Quechua","TravelMate","Adventure"],
+items:["Backpack","Water Bottle","Luggage Set","Camping Tent","Sleeping Bag","Travel Pillow","Hiking Boots","Cooler Bag"],
+min:250,max:50000,
+image:"photo-1553062407-98eeb64c6a62"
+}
+};
+
+const promoTypes=[
+"Flash Sale","Daily Deal","Clearance","Buy 2 Get 1",
+"Black November Mega Deal","Under KSh 500",
+"Under KSh 1,000","Top Trending"
+];
+
+const products=[];
+let id=1;
+
+function randomPrice(min,max){
+return Math.floor(Math.random()*(max-min+1)/10)*10+min;
+}
+
+// Generate 1,000 products in each of 12 departments.
+Object.entries(departments).forEach(([category,data],index)=>{
+for(let i=0;i<1000;i++){
+let brand=data.brands[i%data.brands.length];
+let item=data.items[i%data.items.length];
+let price=randomPrice(data.min,data.max);
+let promo=promoTypes[(id*7)%promoTypes.length];
+
+if(promo==="Under KSh 500")price=Math.min(price,490);
+if(promo==="Under KSh 1,000")price=Math.min(price,990);
+
+let discount=[10,15,20,25,30,35,40,45,50][id%9];
+
+products.push({
+id:id,
+sku:"SM-"+String(id).padStart(5,"0"),
+name:brand+" "+item+" - Edition "+String(Math.floor(i/data.items.length)+1).padStart(3,"0"),
+brand:brand,
+category:category,
+price:price,
+oldPrice:Math.round(price/(1-discount/100)),
+discount:discount,
+promotion:promo,
+rating:(3.5+(id%16)/10).toFixed(1),
+stock:3+(id%118),
+image:"https://images.unsplash.com/"+data.image+"?auto=format&fit=crop&w=600&q=75"
+});
+id++;
+}
+});
+
+const categories=["All Departments",...Object.keys(departments)];
+let selectedCategory="All Departments";
+let selectedPromo="";
+let page=1;
+let cart=[];
+
+const money=n=>"KSh "+Number(n).toLocaleString("en-KE");
+
+function drawCategories(){
+document.getElementById("categories").innerHTML=
+categories.map(c=>`
+<button class="chip ${selectedCategory===c?'active':''}"
+onclick="chooseCategory(${JSON.stringify(c)})">${c}</button>
+`).join("");
+}
+
+function drawPromos(){
+const labels=[
+"⚡ Flash Sale","☀ Daily Deals","🏷 Clearance Sale",
+"🎁 Buy 2 Get 1","🖤 Black November Mega Deals",
+"💸 Under KSh 500","🛍 Under KSh 1,000","🔥 Top Trending"
+];
+document.getElementById("promos").innerHTML=promoTypes.map((p,i)=>`
+<div class="promo" onclick="showPromo(${JSON.stringify(p)})">
+<b>${labels[i]}</b>
+<small>${p} products and special offers</small>
+</div>`).join("");
+}
+
+function chooseCategory(c){
+selectedCategory=c;
+selectedPromo="";
+page=1;
+drawCategories();
+render();
+}
+
+function showPromo(p){
+selectedPromo=p;
+selectedCategory="All Departments";
+page=1;
+drawCategories();
+render();
+}
+
+function render(){
+let q=document.getElementById("search").value.toLowerCase();
+let sort=document.getElementById("sort").value;
+
+let list=products.filter(p=>
+(selectedCategory==="All Departments"||p.category===selectedCategory)&&
+(!selectedPromo||p.promotion===selectedPromo)&&
+(p.name+" "+p.brand+" "+p.category+" "+p.sku).toLowerCase().includes(q)
+);
+
+if(sort==="low")list.sort((a,b)=>a.price-b.price);
+if(sort==="high")list.sort((a,b)=>b.price-a.price);
+if(sort==="discount")list.sort((a,b)=>b.discount-a.discount);
+if(sort==="name")list.sort((a,b)=>a.name.localeCompare(b.name));
+
+document.getElementById("heading").textContent=
+(selectedPromo||selectedCategory)+" ("+list.length.toLocaleString()+" products)";
+
+let pages=Math.max(1,Math.ceil(list.length/40));
+page=Math.min(page,pages);
+
+document.getElementById("products").innerHTML=
+list.slice((page-1)*40,page*40).map(p=>`
+<article class="card">
+<span class="tag">${p.promotion}</span>
+<div class="photo">
+<img src="${p.image}" loading="lazy" alt="${p.name}"
+onerror="this.src='https://placehold.co/500x400?text=SokoMart'">
+</div>
+<div class="info">
+<div class="name">${p.name}</div>
+<div class="muted">★ ${p.rating} • ${p.brand} • ${p.sku}</div>
+<div class="price">${money(p.price)}
+<span class="old">${money(p.oldPrice)}</span>
+<span class="discount">-${p.discount}%</span></div>
+<div class="stock">${p.stock} demo units available</div>
+<button class="add" onclick="addToCart(${p.id})">Add to Cart</button>
+</div>
+</article>
+`).join("")||"<p>No products found.</p>";
+
+let pagination=document.getElementById("pagination");
+pagination.innerHTML="";
+for(let n=Math.max(1,page-2);n<=Math.min(pages,page+2);n++){
+let b=document.createElement("button");
+b.textContent=n;
+b.className=n===page?"active":"";
+b.onclick=()=>{page=n;render();window.scrollTo(0,400)};
+pagination.appendChild(b);
+}
+}
+
+function addToCart(id){
+let item=cart.find(x=>x.id===id);
+if(item)item.qty++;
+else cart.push({id,qty:1});
+updateCart();
+}
+
+function updateCart(){
+document.getElementById("cartCount").textContent=
+cart.reduce((sum,x)=>sum+x.qty,0);
+}
+
+function openCart(){
+document.getElementById("cartItems").innerHTML=
+cart.map(x=>{
+let p=products[x.id-1];
+return `<div class="cartline">
+<span>${p.name}<br>${money(p.price)} × ${x.qty}</span>
+<span>
+<button onclick="changeQty(${p.id},-1)">−</button>
+${x.qty}
+<button onclick="changeQty(${p.id},1)">+</button>
+</span></div>`;
+}).join("")||"<p>Your cart is empty.</p>";
+
+document.getElementById("total").textContent=
+"Total: "+money(cart.reduce((s,x)=>s+products[x.id-1].price*x.qty,0));
+showModal("cart");
+}
+
+function changeQty(id,change){
+let item=cart.find(x=>x.id===id);
+item.qty+=change;
+if(item.qty<=0)cart=cart.filter(x=>x.id!==id);
+updateCart();
+openCart();
+}
+
+function checkout(){
+cart=[];
+updateCart();
+openCart();
+document.getElementById("checkoutMessage").textContent=
+"Demo checkout completed. No real payment was collected.";
+}
+
+function showModal(id){
+document.getElementById(id).style.display="flex";
+}
+
+function closeModal(id){
+document.getElementById(id).style.display="none";
+}
+
+// Email OTP registration: requires the SokoMart backend.
+let pendingEmail="";
+
+document.getElementById("registerForm").addEventListener("submit",async e=>{
+e.preventDefault();
+pendingEmail=document.getElementById("regEmail").value;
+
+try{
+let response=await fetch(API_BASE+"/auth/register",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({
+name:document.getElementById("regName").value,
+email:pendingEmail,
+password:document.getElementById("regPassword").value,
+role:document.getElementById("regRole").value
+})
+});
+let data=await response.json();
+if(!response.ok)throw Error(data.message||"Registration failed");
+
+document.getElementById("otpArea").style.display="block";
+document.getElementById("regMessage").textContent="OTP sent. Check your email.";
+if(data.devOtp)document.getElementById("otpInfo").textContent="Development OTP: "+data.devOtp;
+
+}catch(error){
+document.getElementById("regMessage").textContent=
+"Backend error: "+error.message;
+}
+});
+
+async function verifyOTP(){
+try{
+let response=await fetch(API_BASE+"/auth/verify-otp",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({
+email:pendingEmail,
+otp:document.getElementById("otpCode").value
+})
+});
+let data=await response.json();
+if(!response.ok)throw Error(data.message||"Verification failed");
+
+document.getElementById("regMessage").textContent=
+"Email verified. Your account is ready.";
+document.getElementById("otpArea").style.display="none";
+}catch(error){
+document.getElementById("regMessage").textContent=error.message;
+}
+}
+
+// Login requires the backend.
+document.getElementById("loginForm").addEventListener("submit",async e=>{
+e.preventDefault();
+try{
+let response=await fetch(API_BASE+"/auth/login",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({
+email:document.getElementById("loginEmail").value,
+password:document.getElementById("loginPassword").value
+})
+});
+let data=await response.json();
+if(!response.ok)throw Error(data.message||"Login failed");
+document.getElementById("loginMessage").textContent="Login successful.";
+}catch(error){
+document.getElementById("loginMessage").textContent=error.message;
+}
+});
+
+document.getElementById("search").addEventListener("input",()=>{
+page=1;
+render();
+});
+
+drawCategories();
+drawPromos();
+render();
+</script>
+</body>
+</html>
